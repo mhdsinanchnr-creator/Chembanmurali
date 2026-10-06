@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Hall Warden</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #d9c29c;
+    overflow-x: hidden;
+}
+
+#game {
+    min-height: 100vh;
+    padding: 10px;
+}
+
+/* ---------------- HEADER ---------------- */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #17324d;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.scoreBox {
+    font-size: 20px;
+}
+
+#score {
+    color: #72ff72;
+    font-weight: bold;
+}
+
+#timer {
+    color: #ffe04d;
+    font-weight: bold;
+}
+
+/* ---------------- INSTRUCTIONS ---------------- */
+
+.instructions {
+    text-align: center;
+    background: #fff3c4;
+    padding: 8px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* ---------------- STUDY HALL ---------------- */
+
+.studyHall {
+    background:
+        linear-gradient(#ead6b1 1px, transparent 1px),
+        linear-gradient(90deg, #ead6b1 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-color: #e6cfa5;
+
+    border: 8px solid #755333;
+    border-radius: 15px;
+
+    padding: 15px;
+
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 10px;
+
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* ---------------- STUDENT ---------------- */
+
+.student {
+    position: relative;
+    min-height: 115px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+
+    cursor: pointer;
+    user-select: none;
+}
+
+.student:hover {
+    transform: scale(1.03);
+}
+
+.student.sleeping {
+    animation: sleepy 0.8s infinite alternate;
+}
+
+@keyframes sleepy {
+    from {
+        transform: rotate(-1deg);
+    }
+    to {
+        transform: rotate(1deg);
+    }
+}
+
+/* Head */
+
+.head {
+    width: 42px;
+    height: 42px;
+    background: #f1b27a;
+    border: 3px solid #633d27;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+}
+
+/* Hair */
+
+.head::before {
+    content: "";
+    position: absolute;
+    width: 45px;
+    height: 20px;
+    background: #29231f;
+    border-radius: 50% 50% 20% 20%;
+    top: -4px;
+    left: -4px;
+}
+
+/* Body */
+
+.body {
+    width: 48px;
+    height: 38px;
+    background: #4d82b8;
+    border-radius: 15px 15px 5px 5px;
+    margin-top: -2px;
+}
+
+/* Table */
+
+.table {
+    width: 72px;
+    height: 25px;
+    background: #9a6436;
+    border: 3px solid #68401f;
+    border-radius: 4px;
+    position: relative;
+}
+
+.table::after {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 28px;
+    background: #68401f;
+    left: 8px;
+    top: 20px;
+    box-shadow: 50px 0 #68401f;
+}
+
+/* Book */
+
+.book {
+    position: absolute;
+    width: 28px;
+    height: 10px;
+    background: white;
+    top: 6px;
+    left: 20px;
+    border: 1px solid #777;
+}
+
+/* Student number */
+
+.number {
+    background: white;
+    border: 2px solid #333;
+    border-radius: 4px;
+    padding: 2px 5px;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: bold;
+    z-index: 5;
+}
+
+/* ZZZ */
+
+.zzz {
+    position: absolute;
+    top: -10px;
+    right: 5px;
+
+    color: #17324d;
+    font-size: 20px;
+    font-weight: bold;
+
+    animation: zzzMove 1s infinite alternate;
+}
+
+@keyframes zzzMove {
+    from {
+        transform: translateY(5px);
+        opacity: 0.5;
+    }
+
+    to {
+        transform: translateY(-8px);
+        opacity: 1;
+    }
+}
+
+/* Countdown */
+
+.countdown {
+    position: absolute;
+    top: 22px;
+    left: 2px;
+
+    background: #ff4545;
+    color: white;
+
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+
+    z-index: 10;
+}
+
+/* ---------------- WARDEN ---------------- */
+
+.warden {
+    text-align: center;
+    font-size: 55px;
+    margin: 15px;
+}
+
+.wardenName {
+    font-size: 18px;
+    font-weight: bold;
+    color: #17324d;
+}
+
+/* ---------------- GAME OVER ---------------- */
+
+#gameOver {
+    display: none;
+
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0,0,0,0.75);
+
+    align-items: center;
+    justify-content: center;
+
+    z-index: 100;
+}
+
+.gameOverBox {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+}
+
+.gameOverBox h1 {
+    color: #17324d;
+}
+
+button {
+    background: #17324d;
+    color: white;
+
+    border: none;
+    padding: 14px 25px;
+
+    border-radius: 10px;
+
+    font-size: 18px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+/* ---------------- MOBILE ---------------- */
+
+@media (max-width: 700px) {
+
+    .title {
+        font-size: 17px;
+    }
+
+    .scoreBox {
+        font-size: 14px;
+    }
+
+    .studyHall {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 5px;
+        padding: 8px;
+    }
+
+    .student {
+        min-height: 105px;
+    }
+
+    .head {
+        width: 35px;
+        height: 35px;
+    }
+
+    .head::before {
+        width: 38px;
+    }
+
+    .body {
+        width: 40px;
+        height: 32px;
+    }
+
+    .table {
+        width: 60px;
+    }
+
+    .book {
+        left: 16px;
+    }
+
+    .number {
+        font-size: 9px;
+    }
+
+    .zzz {
+        font-size: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+    <div class="header">
+
+        <div class="title">
+            📚 STUDY HALL
+        </div>
+
+        <div class="scoreBox">
+            ⭐ Score:
+            <span id="score">0</span>
+            &nbsp;&nbsp;
+            ⏱️
+            <span id="timer">120</span>
+        </div>
+
+    </div>
+
+    <div class="instructions">
+        👮 You are the Warden!
+        Tap sleeping students before 5 seconds.
+        🟢 +1 for waking them &nbsp; | &nbsp;
+        🔴 -1 if they sleep for 5 seconds!
+    </div>
+
+    <div class="studyHall" id="studyHall"></div>
+
+    <div class="warden">
+        👮
+        <div class="wardenName">WARDEN</div>
+    </div>
+
+</div>
+
+
+<!-- GAME OVER -->
+
+<div id="gameOver">
+
+    <div class="gameOverBox">
+
+        <h1>📚 Study Hall Closed!</h1>
+
+        <h2>Your Score</h2>
+
+        <div id="finalScore"
+             style="font-size:50px;font-weight:bold;color:#17324d;">
+            0
+        </div>
+
+        <br>
+
+        <button onclick="restartGame()">
+            🔄 Play Again
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   GAME SETTINGS
+===================================================== */
+
+const NUMBER_OF_STUDENTS = 50;
+
+const GAME_TIME = 120;
+
+const SLEEP_TIME = 5;
+
+
+/* =====================================================
+   GAME VARIABLES
+===================================================== */
+
+let score = 0;
+
+let timeLeft = GAME_TIME;
+
+let gameRunning = true;
+
+let students = [];
+
+let gameTimer;
+
+
+/* =====================================================
+   CREATE STUDENTS
+===================================================== */
+
+function createStudents() {
+
+    const hall = document.getElementById("studyHall");
+
+    hall.innerHTML = "";
+
+    students = [];
+
+    for (let i = 0; i < NUMBER_OF_STUDENTS; i++) {
+
+        const student = {
+
+            id: i + 1,
+
+            sleeping: false,
+
+            sleepTimer: null,
+
+            element: null
+
+        };
+
+        const div = document.createElement("div");
+
+        div.className = "student";
+
+        div.innerHTML = `
+
+            <div class="zzz" style="display:none;">
+                Zzz
+            </div>
+
+            <div class="countdown" style="display:none;">
+                5
+            </div>
+
+            <div class="head"></div>
+
+            <div class="body"></div>
+
+            <div class="table">
+
+                <div class="book"></div>
+
+            </div>
+
+            <div class="number">
+                ${i + 1}
+            </div>
+
+        `;
+
+        div.addEventListener("click", function() {
+
+            wakeStudent(student);
+
+        });
+
+        student.element = div;
+
+        students.push(student);
+
+        hall.appendChild(div);
+    }
+}
+
+
+/* =====================================================
+   MAKE A STUDENT SLEEP
+===================================================== */
+
+function makeStudentSleep(student) {
+
+    if (!gameRunning) return;
+
+    if (student.sleeping) return;
+
+    student.sleeping = true;
+
+    student.element.classList.add("sleeping");
+
+    const zzz =
+        student.element.querySelector(".zzz");
+
+    const countdown =
+        student.element.querySelector(".countdown");
+
+    zzz.style.display = "block";
+
+    countdown.style.display = "flex";
+
+    let remaining = SLEEP_TIME;
+
+    countdown.textContent = remaining;
+
+    student.sleepTimer = setInterval(function() {
+
+        remaining--;
+
+        countdown.textContent = remaining;
+
+        if (remaining <= 0) {
+
+            clearInterval(student.sleepTimer);
+
+            student.sleeping = false;
+
+            student.element.classList.remove("sleeping");
+
+            zzz.style.display = "none";
+
+            countdown.style.display = "none";
+
+            score--;
+
+            updateScore();
+
+            showMessage("-1 😴");
+
+        }
+
+    }, 1000);
+}
+
+
+/* =====================================================
+   WAKE STUDENT
+===================================================== */
+
+function wakeStudent(student) {
+
+    if (!gameRunning) return;
+
+    if (!student.sleeping) {
+
+        return;
+
+    }
+
+    clearInterval(student.sleepTimer);
+
+    student.sleeping = false;
+
+    student.element.classList.remove("sleeping");
+
+    student.element.querySelector(".zzz").style.display =
+        "none";
+
+    student.element.querySelector(".countdown").style.display =
+        "none";
+
+    score++;
+
+    updateScore();
+
+    showMessage("+1 ⭐");
+
+}
+
+
+/* =====================================================
+   UPDATE SCORE
+===================================================== */
+
+function updateScore() {
+
+    document.getElementById("score").textContent =
+        score;
+
+}
+
+
+/* =====================================================
+   RANDOMLY CHOOSE SLEEPING STUDENT
+===================================================== */
+
+function chooseSleeper() {
+
+    if (!gameRunning) return;
+
+    const awakeStudents =
+        students.filter(student => !student.sleeping);
+
+    if (awakeStudents.length === 0) return;
+
+    const randomIndex =
+        Math.floor(Math.random() * awakeStudents.length);
+
+    makeStudentSleep(
+        awakeStudents[randomIndex]
+    );
+
+}
+
+
+/* =====================================================
+   RANDOM SLEEP INTERVAL
+===================================================== */
+
+function startSleepingSystem() {
+
+    function scheduleNextSleep() {
+
+        if (!gameRunning) return;
+
+        chooseSleeper();
+
+        const nextTime =
+            Math.random() * 1800 + 700;
+
+        setTimeout(
+            scheduleNextSleep,
+            nextTime
+        );
+    }
+
+    scheduleNextSleep();
+}
+
+
+/* =====================================================
+   GAME TIMER
+===================================================== */
+
+function startGameTimer() {
+
+    gameTimer = setInterval(function() {
+
+        if (!gameRunning) return;
+
+        timeLeft--;
+
+        document.getElementById("timer").textContent =
+            timeLeft;
+
+        if (timeLeft <= 0) {
+
+            endGame();
+
+        }
+
+    }, 1000);
+
+}
+
+
+/* =====================================================
+   END GAME
+===================================================== */
+
+function endGame() {
+
+    gameRunning = false;
+
+    clearInterval(gameTimer);
+
+    students.forEach(student => {
+
+        if (student.sleepTimer) {
+
+            clearInterval(student.sleepTimer);
+
+        }
+
+    });
+
+    document.getElementById("finalScore").textContent =
+        score;
+
+    document.getElementById("gameOver").style.display =
+        "flex";
+
+}
+
+
+/* =====================================================
+   RESTART
+===================================================== */
+
+function restartGame() {
+
+    document.getElementById("gameOver").style.display =
+        "none";
+
+    score = 0;
+
+    timeLeft = GAME_TIME;
+
+    gameRunning = true;
+
+    updateScore();
+
+    document.getElementById("timer").textContent =
+        timeLeft;
+
+    createStudents();
+
+    startSleepingSystem();
+
+    startGameTimer();
+
+}
+
+
+/* =====================================================
+   SMALL SCORE MESSAGE
+===================================================== */
+
+function showMessage(text) {
+
+    const message =
+        document.createElement("div");
+
+    message.textContent = text;
+
+    message.style.position = "fixed";
+
+    message.style.left = "50%";
+
+    message.style.top = "50%";
+
+    message.style.transform =
+        "translate(-50%, -50%)";
+
+    message.style.fontSize = "45px";
+
+    message.style.fontWeight = "bold";
+
+    message.style.color =
+        text.includes("+")
+        ? "green"
+        : "red";
+
+    message.style.zIndex = "200";
+
+    message.style.pointerEvents = "none";
+
+    document.body.appendChild(message);
+
+    setTimeout(function() {
+
+        message.remove();
+
+    }, 700);
+
+}
+
+
+/* =====================================================
+   START GAME
+===================================================== */
+
+createStudents();
+
+startSleepingSystem();
+
+startGameTimer();
+
+</script>
+
+</body>
+</html>
